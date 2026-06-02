@@ -1,0 +1,10 @@
+apiVersion: kpack.io/v1alpha2
+kind: ClusterStore
+metadata:
+  name: paketo
+spec:
+  # Meta-buildpacks for Node/Python/PHP. Pin versions instead of floating if desired.
+  sources:
+    - image: paketobuildpacks/nodejs
+    - image: paketobuildpacks/python
+    - image: paketobuildpacks/php

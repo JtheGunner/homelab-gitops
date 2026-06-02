@@ -1,0 +1,16 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: flux-image-automation
+  namespace: flux-system
+spec:
+  interval: 30m
+  retryInterval: 1m
+  timeout: 5m
+  path: ./infrastructure/flux-image-automation
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+# Add to infrastructure/controllers/kustomization.yaml:
+#   - flux-image-automation.yaml

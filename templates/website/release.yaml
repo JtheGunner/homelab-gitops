@@ -1,0 +1,53 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: __NAME__
+  namespace: webhosting
+spec:
+  interval: 10m
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+  values:
+    # Private ghcr package: the kubelet needs the pull secret to pull the image.
+    defaultPodOptions:
+      imagePullSecrets:
+        - name: ghcr-pull
+    controllers:
+      main:
+        containers:
+          main:
+            image:
+              repository: ghcr.io/__OWNER__/__NAME__
+              # Flux ImageUpdateAutomation writes the latest tag here:
+              tag: latest # {"$imagepolicy": "webhosting:__NAME__:tag"}
+            env:
+              # The Paketo web server (and most apps) listen on $PORT -> = service.port.
+              PORT: "__PORT__"
+            probes:
+              liveness:  { enabled: true }
+              readiness: { enabled: true }
+    service:
+      main:
+        controller: main
+        ports:
+          http:
+            port: __PORT__
+    ingress:
+      main:
+        enabled: true
+        className: traefik
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+        hosts:
+          - host: __HOST__
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  identifier: main
+                  port: http
+        # tls:
+        #   - hosts: [__HOST__]
+        #     secretName: __NAME__-tls

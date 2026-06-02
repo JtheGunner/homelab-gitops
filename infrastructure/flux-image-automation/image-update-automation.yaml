@@ -1,0 +1,32 @@
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageUpdateAutomation
+metadata:
+  name: websites
+  namespace: flux-system
+spec:
+  interval: 5m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system          # created by `flux bootstrap`
+  git:
+    checkout:
+      ref:
+        branch: main
+    commit:
+      author:
+        name: fluxcdbot
+        email: fluxcdbot@users.noreply.github.com
+      messageTemplate: |
+        chore(websites): {{range .Changed.Changes}}{{.OldValue}} -> {{.NewValue}} {{end}}
+    push:
+      branch: main
+  update:
+    strategy: Setters
+    # Only the tool websites are updated automatically.
+    path: ./apps/base/webhosting/websites
+# PREREQUISITES:
+#  - image-reflector-controller + image-automation-controller must be enabled
+#    (flux bootstrap … --components-extra=image-reflector-controller,image-automation-controller).
+#  - the deploy key needs WRITE access (flux bootstrap --read-write-key) so this
+#    automation can push its commits back to the repo.
+# Acts on HelmReleases with a setter marker:  tag: … # {"$imagepolicy": "webhosting:<app>:tag"}

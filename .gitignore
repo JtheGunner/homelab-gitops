@@ -1,0 +1,8 @@
+# Secrets / Keys – niemals committen
+*.agekey
+age.key
+*.key
+*.pem
+kubeconfig
+.env
+.DS_Store

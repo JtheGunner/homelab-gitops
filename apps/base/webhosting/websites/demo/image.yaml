@@ -1,0 +1,24 @@
+apiVersion: kpack.io/v1alpha2
+kind: Image
+metadata:
+  name: demo
+  namespace: webhosting
+spec:
+  tag: ghcr.io/you/demo
+  serviceAccountName: kpack-ghcr-push
+  builder:
+    kind: ClusterBuilder
+    name: paketo-full
+  source:
+    git:
+      url: https://github.com/you/demo
+      revision: main
+  # Build env for buildpacks (optional). Examples:
+  # build:
+  #   env:
+  #     - name: BP_PHP_WEB_DIR        # PHP web root, e.g. Laravel/Symfony
+  #       value: public
+  #     - name: BP_PHP_SERVER         # nginx | httpd (default nginx)
+  #       value: nginx
+# kpack watches the repo, builds on every commit via buildpacks (no Dockerfile)
+# and pushes an immutable, digest-pinned image to ghcr.

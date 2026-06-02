@@ -1,0 +1,23 @@
+apiVersion: kpack.io/v1alpha2
+kind: ClusterBuilder
+metadata:
+  name: paketo-full
+spec:
+  # Where kpack stores the built builder image (your own ghcr repo).
+  tag: ghcr.io/<you>/kpack-builder
+  # Push credential: lives once in the 'webhosting' namespace (see
+  # apps/base/webhosting/websites/ghcr-push-secret.yaml + kpack-ghcr-push-serviceaccount.yaml).
+  serviceAccountRef:
+    name: kpack-ghcr-push
+    namespace: webhosting
+  stack:
+    name: jammy-full
+    kind: ClusterStack
+  store:
+    name: paketo
+    kind: ClusterStore
+  # Language auto-detection from repo contents (package.json / requirements.txt|pyproject / composer.json).
+  order:
+    - group: [{ id: paketo-buildpacks/nodejs }]
+    - group: [{ id: paketo-buildpacks/python }]
+    - group: [{ id: paketo-buildpacks/php }]

@@ -1,0 +1,29 @@
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageRepository
+metadata:
+  name: __NAME__
+  namespace: webhosting
+spec:
+  image: ghcr.io/__OWNER__/__NAME__
+  interval: 5m
+  # Private package: Flux scans the registry with the read token.
+  secretRef:
+    name: ghcr-pull
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImagePolicy
+metadata:
+  name: __NAME__
+  namespace: webhosting
+spec:
+  imageRepositoryRef:
+    name: __NAME__
+  # kpack tags builds as b<N>.<timestamp> (not purely numeric). Extract the build
+  # number and pick the highest. For the Dockerfile/CI path (numeric run_number tags)
+  # use pattern '^[0-9]+$' instead.
+  filterTags:
+    pattern: '^b(?P<num>[0-9]+)\.'
+    extract: '$num'
+  policy:
+    numerical:
+      order: asc

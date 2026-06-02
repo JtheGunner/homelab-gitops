@@ -1,0 +1,20 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: kpack
+  namespace: flux-system
+spec:
+  interval: 30m
+  retryInterval: 1m
+  timeout: 5m
+  path: ./infrastructure/kpack
+  prune: true
+  # NO wait: true — otherwise a not-yet-ready ClusterBuilder blocks the whole
+  # Kustomization with 5-minute timeouts. CRDs/controller are applied without wait;
+  # the builder becomes ready independently once the ghcr-push creds are correct.
+  wait: false
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+# Add to infrastructure/controllers/kustomization.yaml (or your controllers aggregate):
+#   - kpack.yaml

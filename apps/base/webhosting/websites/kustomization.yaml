@@ -1,0 +1,14 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+# Shared namespace + one set of ghcr credentials for all tool websites, then one folder per app.
+resources:
+  - namespace.yaml
+  - kpack-ghcr-push-serviceaccount.yaml
+  - ghcr-pull-secret.yaml
+  - ghcr-push-secret.yaml
+  - github-git-secret.yaml
+  - demo
+  # further websites are added here by `just new-website`
+#
+# IMPORTANT: reference 'websites' from the parent webhosting aggregate
+# (e.g. apps/base/webhosting/kustomization.yaml -> resources: [..., websites]).
