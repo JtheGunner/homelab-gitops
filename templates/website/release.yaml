@@ -40,6 +40,7 @@ spec:
         className: traefik
         annotations:
           traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+          traefik.ingress.kubernetes.io/router.middlewares: "traefik-security-chain@kubernetescrd"
         hosts:
           - host: __HOST__
             paths:

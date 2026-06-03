@@ -1,9 +1,10 @@
 # Website onboarding tool for kubernetes-config
 
-# New website:  just new-website <name> <repo> <host> <port> [owner]
+# New website:  just new-website <name> <repo> <host> <port> [owner] [db]
 # Target repo via KCONFIG_ROOT (default: this staging mirror).
-new-website name repo host port owner="":
-    ./scripts/new-website.sh "{{name}}" "{{repo}}" "{{host}}" "{{port}}" "{{owner}}"
+# [db]: leave empty for no DB, or "mariadb" to bundle a MariaDB into the release.
+new-website name repo host port owner="" db="":
+    ./scripts/new-website.sh "{{name}}" "{{repo}}" "{{host}}" "{{port}}" "{{owner}}" "{{db}}"
 
 # Local validation (requires kustomize + kubeconform).
 validate:

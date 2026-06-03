@@ -1,3 +1,6 @@
+.idea/
+
+
 # Secrets / Keys – niemals committen
 *.agekey
 age.key

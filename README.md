@@ -83,6 +83,29 @@ just new-website myblog https://github.com/<you>/myblog myblog.example.com 3000 
 Generates `apps/base/webhosting/websites/myblog/` and adds it to the kustomization.
 Review (port!), commit, push → kpack builds, Flux deploys.
 
+### With a bundled database (MariaDB)
+
+Pass `mariadb` as the 6th argument to bundle a database into the website's
+HelmRelease (a second `db` controller — MariaDB StatefulSet — plus a 5Gi PVC and
+a service on `3306`):
+
+```sh
+just new-website myblog https://github.com/<you>/myblog myblog.example.com 3000 <you> mariadb
+```
+
+This additionally writes `db-secret.yaml` (credentials) and `db-patch.yaml` (a
+Kustomize strategic-merge patch that adds the DB to the release without touching
+`release.yaml`). The app container gets `DB_HOST`/`DB_PORT`/`DB_DATABASE`/
+`DB_USERNAME`/`DB_PASSWORD` injected — **rename those keys in `db-patch.yaml` to
+match your framework** (e.g. Laravel uses exactly these; others differ). MariaDB
+speaks the MySQL wire protocol, so apps connect as they would to MySQL.
+
+> ⚠️ `db-secret.yaml` is generated with **plaintext** random passwords. Encrypt it
+> before committing, like the other secrets: `sops --encrypt --in-place db-secret.yaml`.
+
+For production-grade DBs (HA, automated backups) prefer a dedicated operator
+(e.g. CloudNativePG for Postgres) installed under `infrastructure/controllers/`.
+
 ## App requirements (buildpacks, no Dockerfile)
 
 - App at the repo root (otherwise set `spec.source.subPath` in `image.yaml`).

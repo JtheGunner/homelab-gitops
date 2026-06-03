@@ -1,0 +1,79 @@
+# Adds a bundled MariaDB to the '__NAME__' HelmRelease (app-template).
+# Applied as a Kustomize strategic-merge patch (see kustomization.yaml), so it
+# MERGES into spec.values without touching the base release.yaml:
+#   - a second controller 'db' (StatefulSet) running MariaDB
+#   - a PVC 'db-data' mounted only on the db controller (advancedMounts)
+#   - a service 'db' on 3306
+#   - DB connection env injected into the app container 'main'
+#
+# NOTE: env is a MAP in app-template, so these keys merge into the existing
+# env (PORT stays). MariaDB speaks the MySQL wire protocol — apps connect
+# exactly as they would to MySQL.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: __NAME__
+  namespace: webhosting
+spec:
+  values:
+    controllers:
+      # Connection details for the app. Rename these keys to whatever your
+      # framework expects (e.g. Laravel: DB_HOST/DB_DATABASE/DB_USERNAME/DB_PASSWORD).
+      main:
+        containers:
+          main:
+            env:
+              DB_HOST: __NAME__-db   # = the Service name below; verify with `kubectl -n webhosting get svc`
+              DB_PORT: "3306"
+              DB_DATABASE:
+                valueFrom:
+                  secretKeyRef: { name: __NAME__-db, key: MARIADB_DATABASE }
+              DB_USERNAME:
+                valueFrom:
+                  secretKeyRef: { name: __NAME__-db, key: MARIADB_USER }
+              DB_PASSWORD:
+                valueFrom:
+                  secretKeyRef: { name: __NAME__-db, key: MARIADB_PASSWORD }
+      db:
+        type: statefulset
+        containers:
+          mariadb:
+            image:
+              repository: mariadb
+              tag: "11.4"
+            # Bootstraps DB/user/passwords from the secret on first start.
+            envFrom:
+              - secretRef:
+                  name: __NAME__-db
+            probes:
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  exec: { command: ["healthcheck.sh", "--connect", "--innodb_initialized"] }
+                  initialDelaySeconds: 20
+                  periodSeconds: 10
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  exec: { command: ["healthcheck.sh", "--connect", "--innodb_initialized"] }
+                  initialDelaySeconds: 10
+                  periodSeconds: 10
+    persistence:
+      db-data:
+        type: persistentVolumeClaim
+        accessMode: ReadWriteOnce
+        size: 5Gi
+        # advancedMounts binds the volume ONLY to the db controller/container,
+        # so the app pod doesn't get the DB data dir.
+        advancedMounts:
+          db:
+            mariadb:
+              - path: /var/lib/mysql
+    service:
+      db:
+        controller: db
+        ports:
+          mariadb:
+            port: 3306

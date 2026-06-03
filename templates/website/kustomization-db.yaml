@@ -1,0 +1,15 @@
+# Variant used when a website is created WITH a bundled DB
+# (`just new-website ... mariadb`). The script writes this out as
+# kustomization.yaml. Identical to the plain variant plus db-secret + db-patch.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - image.yaml
+  - imagepolicy.yaml
+  - release.yaml
+  - db-secret.yaml
+patches:
+  - path: db-patch.yaml
+    target:
+      kind: HelmRelease
+      name: __NAME__
