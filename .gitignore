@@ -1,7 +1,7 @@
 .idea/
 
 
-# Secrets / Keys – niemals committen
+# Secrets / keys – never commit
 *.agekey
 age.key
 *.key
