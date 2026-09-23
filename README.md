@@ -130,3 +130,11 @@ drop `image.yaml` (kpack), keep `imagepolicy.yaml` + `release.yaml`. For the CI 
 - Ingress: `className: traefik` + the `traefik.ingress.kubernetes.io/router.entrypoints`
   annotation — adapt to your Traefik/cert-manager convention (TLS is terminated by Traefik;
   see `templates/website/release.yaml`).
+
+## Contributing
+
+Issues and pull requests are welcome. For larger changes, open an issue first.
+
+## License
+
+[MIT](LICENSE)
