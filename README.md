@@ -111,10 +111,11 @@ Use three narrowly scoped tokens instead of one broad all-repo token:
 > `ghcr.io/buildpacks-community/kpack/lifecycle` with these credentials, and a fine-grained
 > PAT is rejected with `DENIED` for that foreign namespace.
 
-Fill in and encrypt the files in `apps/base/webhosting/websites/` — each one documents a
-`kubectl create secret … --dry-run=client -o yaml | sops --encrypt` one-liner. The website
-templates wire `ghcr-pull` in automatically (`ImageRepository.secretRef` and
-`defaultPodOptions.imagePullSecrets`).
+Fill in and encrypt the files in `apps/base/webhosting/websites/` — the `ghcr-pull` and
+`ghcr-push` secrets document a `kubectl create secret … --dry-run=client -o yaml | sops
+--encrypt` one-liner (`github-git-secret.yaml` is basic-auth, so fill in its `username`/
+`password` directly). The website templates wire `ghcr-pull` in automatically
+(`ImageRepository.secretRef` and `defaultPodOptions.imagePullSecrets`).
 
 ### 3. Vendor the kpack core
 
